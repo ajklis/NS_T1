@@ -1,0 +1,63 @@
+SELECT 
+	nazwa, 
+	dbo.typy_pojazdow.nazwa_typu
+FROM dbo.pojazdy 
+JOIN dbo.typy_pojazdow
+	ON dbo.pojazdy.id_typu_pojazdu = dbo.typy_pojazdow.id_typu
+
+
+
+SELECT 
+	pojazdy.nazwa, 
+	typy_ustawien.nazwa_ustawienia, 
+	wartosc
+FROM ustawienia_pojazdow
+JOIN typy_ustawien 
+	ON ustawienia_pojazdow.id_typu_ustawienia = typy_ustawien.id_typu_ustawienia
+JOIN pojazdy 
+	ON pojazdy.id_pojazdu = ustawienia_pojazdow.id_pojazdu
+FOR JSON PATH,
+	INCLUDE_NULL_VALUES
+	
+	
+	
+SELECT 
+	typy_pojazdow.nazwa_typu,
+	pojazdy.nazwa, 
+	typy_ustawien.nazwa_ustawienia, 
+	ustawienia_pojazdow.wartosc
+FROM pojazdy
+RIGHT OUTER JOIN ustawienia_pojazdow 
+	ON pojazdy.id_pojazdu = ustawienia_pojazdow.id_pojazdu
+RIGHT OUTER JOIN typy_ustawien 
+	ON ustawienia_pojazdow.id_typu_ustawienia = typy_ustawien.id_typu_ustawienia
+JOIN typy_pojazdow
+	ON pojazdy.id_typu_pojazdu = typy_pojazdow.id_typu;
+	
+
+
+
+DECLARE @count INT, @i INT
+SET @count = (SELECT COUNT(*) FROM pojazdy)
+SET @i = 1
+
+WHILE(@i <= @count)
+BEGIN
+
+	/*SELECT * FROM pojazdy WHERE @i=pojazdy.id_pojazdu*/
+
+	SELECT 
+		typy_ustawien.id_typu_ustawienia as id_ust, 
+		ustawienia_pojazdow.wartosc as war
+	FROM pojazdy
+	JOIN ustawienia_pojazdow 
+		ON ustawienia_pojazdow.id_pojazdu = pojazdy.id_pojazdu
+	JOIN typy_ustawien 
+		ON typy_ustawien.id_typu_ustawienia = ustawienia_pojazdow.id_typu_ustawienia
+	WHERE pojazdy.id_pojazdu = @i
+	FOR JSON PATH,
+		INCLUDE_NULL_VALUES,
+		WITHOUT_ARRAY_WRAPPER
+	SET @i = @i+1
+END
+
